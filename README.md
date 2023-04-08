@@ -1,7 +1,8 @@
-# Fast API を App Runner に色々なパターンでデプロイしてみる検証用リポジトリ
+# 概要
+AWS App Runner に FastAPI をデプロイする際の様々なパターンを検証するリポジトリ
 
 # 呼称
 AWS リソースを管理しやすい用に 「fastrunner」 と呼称するとする
 
 ## パターン①
-TBD
+[pattern_01](https://github.com/g-kawano/fast_runner/tree/main/pattern_01)
