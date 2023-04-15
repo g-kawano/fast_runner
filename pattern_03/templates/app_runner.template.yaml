@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "app_runner.template.yml"
+
+#----------------------------------------
+# Parameters
+#----------------------------------------
+Parameters:
+  AppName:
+    Type: String
+    Default: fastrunner
+
+Resources:
+  AppRunner:
+    Type: AWS::AppRunner::Service
+    Properties:
+      ServiceName: !Sub "${AppName}-service"
+      SourceConfiguration:
+        AuthenticationConfiguration:
+          AccessRoleArn: !GetAtt EcrAccessRole.Arn
+        AutoDeploymentsEnabled: true
+        ImageRepository:
+          ImageIdentifier: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${AppName}-image:latest"
+          ImageRepositoryType: ECR
+          ImageConfiguration:
+            Port: "8000"
+      InstanceConfiguration:
+        Cpu: 1 vCPU
+        Memory: 2 GB
+        InstanceRoleArn: !GetAtt AppRunnerRole.Arn
+
+  AppRunnerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AppName}-app-runner-service-role"
+      ManagedPolicyArns:
+        - !Ref AppRunnerPolicy
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - tasks.apprunner.amazonaws.com
+            Action: sts:AssumeRole
+
+  AppRunnerPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub "${AppName}-fast-runner-policy"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - "dynamodb:GetItem"
+            Resource:
+              - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/fastrunner-table"
+
+  EcrAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AppName}-ecr-access-role"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - build.apprunner.amazonaws.com
+            Action: sts:AssumeRole

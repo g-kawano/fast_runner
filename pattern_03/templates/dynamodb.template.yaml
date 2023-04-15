@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "dynamodb.template.yml"
+
+Parameters:
+  AppName:
+    Type: String
+    Default: fastrunner
+
+Resources:
+  ItemsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AppName}-table"
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
