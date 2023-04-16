@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "aurora.template.yml"
+
+Parameters:
+  AppName:
+    Type: String
+    Default: fastrunner
+
+Resources:
+  AuroraDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: !Sub "${AppName}-db-subnet-group"
+      DBSubnetGroupDescription: !Sub "for ${AppName}"
+      SubnetIds:
+        - !ImportValue
+          Fn::Sub: "${AppName}-private-subnet-1"
+        - !ImportValue
+          Fn::Sub: "${AppName}-private-subnet-2"
+
+  AuroraDBCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      Engine: aurora
+      EngineMode: serverless
+      DatabaseName: !Sub "${AppName}Db"
+      ScalingConfiguration:
+        AutoPause: true
+      MasterUsername:
+        !Join [
+          "",
+          [
+            "{{resolve:secretsmanager:",
+            !Ref DBSecret,
+            ":SecretString:username}}",
+          ],
+        ]
+      MasterUserPassword:
+        !Join [
+          "",
+          [
+            "{{resolve:secretsmanager:",
+            !Ref DBSecret,
+            ":SecretString:password}}",
+          ],
+        ]
+      BackupRetentionPeriod: 1
+      DeletionProtection: false
+      VpcSecurityGroupIds:
+        - !ImportValue
+          Fn::Sub: "${AppName}-db-security-group-id"
+      DBSubnetGroupName: !Ref AuroraDBSubnetGroup
+      Tags:
+        - Key: Name
+          Value: !Sub "${AppName}-db"
+
+  DBSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "${AppName}-dbpassword"
+      GenerateSecretString:
+        SecretStringTemplate: '{"username":"admin"}'
+        GenerateStringKey: "password"
+        PasswordLength: 12
+        ExcludeCharacters: '"@/\'
+      Tags:
+        - Key: Name
+          Value: !Sub "${AppName}-dbpassword"

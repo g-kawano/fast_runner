@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "security_group.template.yml"
+
+Parameters:
+  AppName:
+    Type: String
+    Default: fastrunner
+
+Resources:
+  AppRunnerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow outbound traffic for the App Runner service
+      VpcId: !ImportValue
+        Fn::Sub: "${AppName}-vpc"
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub "${AppName}-apprunner-sg"
+
+  AuroraSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow access to the Aurora DB from the App Runner service
+      VpcId: !ImportValue
+        Fn::Sub: "${AppName}-vpc"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref AppRunnerSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !ImportValue
+            Fn::Sub: "${AppName}-bastion-security-group-id"
+      Tags:
+        - Key: Name
+          Value: !Sub "${AppName}-db-sg"
+
+Outputs:
+  AppRunnerSecurityGroupId:
+    Value: !Ref AppRunnerSecurityGroup
+    Export:
+      Name: !Sub "${AppName}-apprunner-security-group-id"
+  AuroraSecurityGroupId:
+    Value: !Ref AuroraSecurityGroup
+    Export:
+      Name: !Sub "${AppName}-db-security-group-id"

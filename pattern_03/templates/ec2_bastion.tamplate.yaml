@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "ec2.template.yml"
+
+Parameters:
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+  AppName:
+    Type: String
+    Default: "fastrunner"
+  AllowIp:
+    Type: String
+    Description: "xxx.xxx.xxx.xxx/32"
+
+Resources:
+  BastionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub "${AppName}-bastion-sg"
+      VpcId: !ImportValue
+        Fn::Sub: "${AppName}-vpc"
+      Tags:
+        - Key: Name
+          Value: !Sub "${AppName}-bastion-sg"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref AllowIp
+
+  BastionInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-052c9af0c988f8bbd
+      InstanceType: t2.micro
+      KeyName: !Ref KeyName
+      NetworkInterfaces:
+        - GroupSet:
+            - !Ref BastionSecurityGroup
+          AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          DeleteOnTermination: true
+          SubnetId: !ImportValue
+            Fn::Sub: "${AppName}-public-subnet-1"
+      Tags:
+        - Key: Name
+          Value: !Sub "${AppName}-bastion"
+
+Outputs:
+  BastionSecurityGroupId:
+    Value: !Ref BastionSecurityGroup
+    Export:
+      Name: !Sub "${AppName}-bastion-security-group-id"
