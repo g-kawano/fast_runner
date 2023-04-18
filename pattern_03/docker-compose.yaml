@@ -16,21 +16,3 @@ services:
     restart: always
     ports:
       - 8000:8000
-
-  localstack:
-    image: localstack/localstack:latest
-    container_name: localstack
-    environment:
-      - SERVICES=dynamodb
-      - DOCKER_HOST=unix:///var/run/docker.sock
-      # dummy
-      - AWS_DEFAULT_REGION=ap-northeast-1
-      - AWS_DEFAULT_OUTPUT=json
-      - AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXX
-      - AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXX
-    volumes:
-      - ./scripts:/scripts
-      - "./scripts:/etc/localstack/init/ready.d"
-    ports:
-      - "127.0.0.1:4566:4566"
-      - "127.0.0.1:4510-4559:4510-4559"
