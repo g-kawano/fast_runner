@@ -1,4 +1,5 @@
 import boto3
+from app.lib.db.models.items import get_item_by_id
 from app.setting import settings
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -13,6 +14,7 @@ class ResponseItem(BaseModel):
 
     id: str
     name: str
+    age: int
 
 
 @app.get("/")
@@ -25,4 +27,9 @@ def get_item(id: str):
     """
     アイテムを取得する
     """
-    pass
+    item = get_item_by_id(id)
+
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    return item

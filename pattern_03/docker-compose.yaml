@@ -7,12 +7,17 @@ services:
       dockerfile: Dockerfile
     container_name: fastapi-container
     environment:
-      - LOCAL_STACK_ENDPOINT=http://localstack:4566
+      LOCAL_STACK_ENDPOINT: http://localstack:4566
+      AWS_DEFAULT_REGION: ap-northeast-1
+      AWS_DEFAULT_OUTPUT: json
       # dummy
-      - AWS_DEFAULT_REGION=ap-northeast-1
-      - AWS_DEFAULT_OUTPUT=json
-      - AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXX
-      - AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXX
+      AWS_ACCESS_KEY_ID: XXXXXXXXXXXXXX
+      AWS_SECRET_ACCESS_KEY: XXXXXXXXXXXXXX
+      DB_HOST: mysql
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      IS_CONNECTION_LOCAL: "True"
     restart: always
     ports:
       - 8000:8000
@@ -30,5 +35,5 @@ services:
       - ./scripts:/docker-entrypoint-initdb.d
     restart: always
     ports:
-    - 3306:3306
+    - "127.0.0.1:3306:3306"
 

@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 fastapi = {extras = ["all"], version = "*"}
 boto3 = "*"
+sqlalchemy = "*"
+pymysql = "*"
+cryptography = "*"
 
 [dev-packages]
 uvicorn = "*"
