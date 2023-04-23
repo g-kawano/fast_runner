@@ -2,6 +2,7 @@ import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from urllib.parse import quote
 
 # 環境変数から設定値を取得
 DB_USER = os.environ["DB_USER"]
@@ -16,7 +17,7 @@ if IS_CONNECTION_LOCAL:
 
     DB_URL = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:3306/{DB_NAME}"
 else:
-    DB_URL = "your_remote_db_url_here"
+    DB_URL = f"mysql+pymysql://{quote(DB_USER)}:{quote(DB_PASS)}@{quote(DB_HOST)}:3306/{quote(DB_NAME)}?charset=utf8"
 
 engine = create_engine(DB_URL)
 Session = sessionmaker(bind=engine)

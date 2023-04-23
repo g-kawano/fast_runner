@@ -4,6 +4,7 @@ from app.setting import settings
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+
 app = FastAPI()
 
 

@@ -8,6 +8,17 @@ Parameters:
   AppName:
     Type: String
     Default: fastrunner
+  DbUser:
+    Type: String
+    NoEcho: true
+  DbPass:
+    Type: String
+    NoEcho: true
+  DbName:
+    Type: String
+  DbHostUrl:
+    Type: String
+    NoEcho: true
 
 Resources:
   AppRunner:
@@ -23,10 +34,40 @@ Resources:
           ImageRepositoryType: ECR
           ImageConfiguration:
             Port: "8000"
+            RuntimeEnvironmentVariables:
+              - Name: DB_USER
+                Value:
+                  Ref: DbUser
+              - Name: DB_PASS
+                Value:
+                  Ref: DbPass
+              - Name: DB_NAME
+                Value:
+                  Ref: DbName
+              - Name: DB_HOST
+                Value:
+                  Ref: DbHostUrl
       InstanceConfiguration:
         Cpu: 1 vCPU
         Memory: 2 GB
         InstanceRoleArn: !GetAtt AppRunnerRole.Arn
+      NetworkConfiguration:
+        EgressConfiguration:
+          EgressType: VPC
+          VpcConnectorArn: !GetAtt VpcConnector.VpcConnectorArn
+
+  VpcConnector:
+    Type: AWS::AppRunner::VpcConnector
+    Properties:
+      VpcConnectorName: !Sub "${AppName}-vpc-connector"
+      Subnets:
+        - !ImportValue
+          Fn::Sub: "${AppName}-private-subnet-1"
+        - !ImportValue
+          Fn::Sub: "${AppName}-private-subnet-2"
+      SecurityGroups:
+        - !ImportValue
+          Fn::Sub: "${AppName}-apprunner-security-group-id"
 
   AppRunnerRole:
     Type: AWS::IAM::Role
