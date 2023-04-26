@@ -1,6 +1,6 @@
 # Aurora から取得するパターン
 
-![](./images/pattern_02.png)
+![](./images/pattern_03.png)
 
 ## 開発方法
 
@@ -18,7 +18,7 @@ curl http://localhost:8000/items/1
 
 ### MySQL のデータをカスタマイズする場合
 
-[initDb.sql](./scripts/init.sh) から変更する
+[initDb.sql](./scripts/initDb.sql) から変更する
 
 本当はスキーマからマイグレーションで初期セットアップした方が良さそう（？）
 
