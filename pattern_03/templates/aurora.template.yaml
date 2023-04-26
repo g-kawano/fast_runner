@@ -7,17 +7,6 @@ Parameters:
     Default: fastrunner
 
 Resources:
-  AuroraDBSubnetGroup:
-    Type: AWS::RDS::DBSubnetGroup
-    Properties:
-      DBSubnetGroupName: !Sub "${AppName}-db-subnet-group"
-      DBSubnetGroupDescription: !Sub "for ${AppName}"
-      SubnetIds:
-        - !ImportValue
-          Fn::Sub: "${AppName}-private-subnet-1"
-        - !ImportValue
-          Fn::Sub: "${AppName}-private-subnet-2"
-
   AuroraDBCluster:
     Type: AWS::RDS::DBCluster
     Properties:
@@ -32,7 +21,7 @@ Resources:
           [
             "{{resolve:secretsmanager:",
             !Ref DBSecret,
-            ":SecretString:username}}",
+            ":SecretString:DB_USER}}",
           ],
         ]
       MasterUserPassword:
@@ -41,7 +30,7 @@ Resources:
           [
             "{{resolve:secretsmanager:",
             !Ref DBSecret,
-            ":SecretString:password}}",
+            ":SecretString:DB_PASS}}",
           ],
         ]
       BackupRetentionPeriod: 1
@@ -49,7 +38,8 @@ Resources:
       VpcSecurityGroupIds:
         - !ImportValue
           Fn::Sub: "${AppName}-db-security-group-id"
-      DBSubnetGroupName: !Ref AuroraDBSubnetGroup
+      DBSubnetGroupName: !ImportValue
+          Fn::Sub: "${AppName}-db-subnet-group"
       Tags:
         - Key: Name
           Value: !Sub "${AppName}-db"
@@ -59,10 +49,29 @@ Resources:
     Properties:
       Name: !Sub "${AppName}-dbpassword"
       GenerateSecretString:
-        SecretStringTemplate: '{"username":"admin"}'
-        GenerateStringKey: "password"
+        SecretStringTemplate: '{"DB_USER":"admin"}'
+        GenerateStringKey: "DB_PASS"
         PasswordLength: 12
         ExcludeCharacters: '"@/\'
       Tags:
         - Key: Name
           Value: !Sub "${AppName}-dbpassword"
+
+Outputs:
+  AuroraEndpoint:
+    Description: Aurora cluster endpoint
+    Value:
+      !Join [
+        "",
+        [
+          !GetAtt AuroraDBCluster.Endpoint.Address,
+          ":",
+          !GetAtt AuroraDBCluster.Endpoint.Port,
+        ],
+      ]
+    Export:
+      Name: !Sub "${AppName}-db-endpoint"
+  DBSecretArn:
+    Value: !Ref DBSecret
+    Export:
+      Name: !Sub "${AppName}-db-secrets-arn"

@@ -12,6 +12,19 @@ class Settings(BaseSettings):
 
     AWS_REGION = "ap-northeast-1"
 
+    # Secrets Manager からユーザーパスワードを取得
+    DB_SECRETS: Optional[str]
+
+    DB_USER: Optional[str]
+
+    DB_PASS: Optional[str]
+
+    DB_NAME: str
+
+    DB_HOST: str
+
+    IS_CONNECTION_LOCAL: Optional[bool] = False
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

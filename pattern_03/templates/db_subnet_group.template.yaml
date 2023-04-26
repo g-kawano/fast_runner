@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "db_subnet_group.template.yml"
+
+Parameters:
+  AppName:
+    Type: String
+    Default: fastrunner
+
+Resources:
+  AuroraDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: !Sub "${AppName}-db-subnet-group"
+      DBSubnetGroupDescription: !Sub "for ${AppName}"
+      SubnetIds:
+        - !ImportValue
+          Fn::Sub: "${AppName}-private-subnet-1"
+        - !ImportValue
+          Fn::Sub: "${AppName}-private-subnet-2"
+
+Outputs:
+  SubnetGroup:
+    Value: !Ref AuroraDBSubnetGroup
+    Export:
+      Name: !Sub "${AppName}-db-subnet-group"

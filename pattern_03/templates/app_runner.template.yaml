@@ -8,17 +8,8 @@ Parameters:
   AppName:
     Type: String
     Default: fastrunner
-  DbUser:
-    Type: String
-    NoEcho: true
-  DbPass:
-    Type: String
-    NoEcho: true
   DbName:
     Type: String
-  DbHostUrl:
-    Type: String
-    NoEcho: true
 
 Resources:
   AppRunner:
@@ -34,19 +25,17 @@ Resources:
           ImageRepositoryType: ECR
           ImageConfiguration:
             Port: "8000"
+            RuntimeEnvironmentSecrets:
+              - Name: DB_SECRETS
+                Value: !ImportValue
+                  Fn::Sub: "${AppName}-db-secrets-arn"
             RuntimeEnvironmentVariables:
-              - Name: DB_USER
-                Value:
-                  Ref: DbUser
-              - Name: DB_PASS
-                Value:
-                  Ref: DbPass
               - Name: DB_NAME
                 Value:
                   Ref: DbName
               - Name: DB_HOST
-                Value:
-                  Ref: DbHostUrl
+                Value: !ImportValue
+                  Fn::Sub: "${AppName}-db-endpoint"
       InstanceConfiguration:
         Cpu: 1 vCPU
         Memory: 2 GB
@@ -96,6 +85,15 @@ Resources:
               - "dynamodb:GetItem"
             Resource:
               - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/fastrunner-table"
+          - Effect: Allow
+            Action:
+              - "secretsmanager:GetSecretValue"
+              - "secretsmanager:DescribeSecret"
+              - "kms:Decrypt*"
+            Resource:
+              - !ImportValue
+                Fn::Sub: "${AppName}-db-secrets-arn"
+              - !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*"
 
   EcrAccessRole:
     Type: AWS::IAM::Role

@@ -1,23 +1,17 @@
+import json
 import os
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from urllib.parse import quote
 
-# 環境変数から設定値を取得
-DB_USER = os.environ["DB_USER"]
-DB_PASS = os.environ["DB_PASS"]
-DB_NAME = os.environ["DB_NAME"]
-DB_HOST = os.environ["DB_HOST"]
-
-IS_CONNECTION_LOCAL = os.environ.get("IS_CONNECTION_LOCAL", False)
+from app.setting import settings
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 # ローカルDB接続かどうかの判断
-if IS_CONNECTION_LOCAL:
-
-    DB_URL = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:3306/{DB_NAME}"
+if settings.IS_CONNECTION_LOCAL:
+    DB_URL = f"mysql+pymysql://{settings.DB_USER}:{settings.DB_PASS}@{settings.DB_HOST}:3306/{settings.DB_NAME}"
 else:
-    DB_URL = f"mysql+pymysql://{quote(DB_USER)}:{quote(DB_PASS)}@{quote(DB_HOST)}:3306/{quote(DB_NAME)}?charset=utf8"
+    db_secrets = json.loads(settings.DB_SECRETS)
+    DB_URL = f"mysql+pymysql://{quote(db_secrets['DB_USER'])}:{quote(db_secrets['DB_PASS'])}@{quote(settings.DB_HOST)}:3306/{quote(settings.DB_NAME)}?charset=utf8"
 
 engine = create_engine(DB_URL)
 Session = sessionmaker(bind=engine)
