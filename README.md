@@ -13,3 +13,7 @@ AWS リソースを管理しやすい用に 「fastrunner」 と呼称すると�
 ## DynamoDB から取得するパターン
 
 [pattern_02](https://github.com/g-kawano/fast_runner/tree/main/pattern_02)
+
+# Aurora から取得するパターン
+
+[pattern_03](https://github.com/g-kawano/fast_runner/tree/main/pattern_03)
