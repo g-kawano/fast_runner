@@ -29,7 +29,6 @@ services:
       - AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXX
       - AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXX
     volumes:
-      - ./scripts:/scripts
       - "./scripts:/etc/localstack/init/ready.d"
     ports:
       - "127.0.0.1:4566:4566"
